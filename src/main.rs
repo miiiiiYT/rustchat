@@ -4,34 +4,10 @@ use std::path::PathBuf;
 
 use clap::{arg, command, value_parser, ArgAction, ArgGroup, Command};
 
-/* #[derive(Parser, Debug)]
-#[command(author, version, about, long_about=None)]
-struct Args {
-    /// Set rustchat to act as a client
-    #[arg(short, long, default_value_t = true)]
-    client: bool,
+use tokio::net::{TcpListener, TcpStream};
+use tokio::io::{AsyncWriteExt, AsyncReadExt};
 
-    /// Set rustchat to act as a server
-    #[arg(short, long, default_value_t = false)]
-    server: bool,
-
-    /// The host to connect to
-    #[arg(short, long)]
-    host: String,
-
-    /// Your name to use
-    #[arg(short, long)]
-    name: String,
-
-    /// Whether or not to use rustchat interactively
-    #[arg(short, long, default_value_t = false)]
-    interactive: bool,
-
-    /// Display help
-    #[arg(long, action = clap::ArgAction::Count)]
-    help: bool,
-} */
-
+#[tokio::main]
 fn main() {
     let matches = command!()
         .disable_help_flag(true)
