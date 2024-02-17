@@ -1,13 +1,10 @@
 pub mod util;
+pub mod client;
+pub mod interactive;
+pub mod server;
 
-use std::path::PathBuf;
+use clap::{arg, command, ArgAction, ArgGroup, value_parser};
 
-use clap::{arg, command, value_parser, ArgAction, ArgGroup, Command};
-
-use tokio::net::{TcpListener, TcpStream};
-use tokio::io::{AsyncWriteExt, AsyncReadExt};
-
-#[tokio::main]
 fn main() {
     let matches = command!()
         .disable_help_flag(true)
@@ -28,7 +25,8 @@ fn main() {
         .arg(arg!(
                 -h --host <HOST> "The host to connect to"
             )
-            .required_unless_present("interactive")
+            .required_unless_present_any(["interactive","server"])
+            .value_parser(value_parser!(String))
         )
         .arg(arg!(
                 -n --name <NAME> "Your preferred username"
@@ -55,11 +53,17 @@ fn main() {
         )
         .get_matches();
 
-    loop {
-        if matches.get_flag("interactive") {
-            unimplemented!();
-        } else {
-            
-        }
+    if matches.get_flag("interactive") {
+        interactive::main();
+        return;
+    } else if matches.get_flag("server") {
+        server::main();
+        return;
+    } else if matches.get_flag("client") {
+        //let mut host = matches.get_one("host").unwrap();
+        client::main(matches.get_one::<String>("host").unwrap().to_string());
+        return;
+    } else {
+        unreachable!();
     }
 }
