@@ -2,6 +2,7 @@ pub mod util;
 pub mod client;
 pub mod interactive;
 pub mod server;
+pub mod ident;
 
 use clap::{arg, command, ArgAction, ArgGroup, value_parser};
 
@@ -61,7 +62,7 @@ fn main() {
         return;
     } else if matches.get_flag("client") {
         //let mut host = matches.get_one("host").unwrap();
-        client::main(matches.get_one::<String>("host").unwrap().to_string());
+        client::main(matches.get_one::<String>("host").unwrap().to_string(), matches.get_one::<String>("name").unwrap().to_string());
         return;
     } else {
         unreachable!();
