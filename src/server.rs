@@ -31,13 +31,13 @@ pub fn main() {
 
 	listener.for_each(move |event| match event.network() {
 		NetEvent::Connected(_, _) => unreachable!(),
-		NetEvent::Accepted(endpoint, listener) => {
+		NetEvent::Accepted(endpoint, _listener) => {
 			println!("New connection from {}", endpoint.addr());
 			clients.push(Client::new("UNREGISTERED".to_string(), endpoint.addr(), endpoint));
 		},
 		NetEvent::Message(endpoint, data) => {
-			let msg = String::from_utf8_lossy(data);
-			println!("Received: {}", msg);
+			let received = String::from_utf8_lossy(data);
+			println!("Received: {}", received);
 			let client_index = clients.iter().position(|c| c.address == endpoint.addr()).unwrap();
 			let client = match clients.get_mut(client_index) {
 				Some(c) => c,
@@ -48,7 +48,7 @@ pub fn main() {
 					return;
 				}
 			};
-			let ident: Identification = match Identification::from(msg.to_string()) {
+			let ident: Identification = match Identification::from(received.to_string()) {
 				Some(i) => i,
 				None => {
 					handler.network().send(endpoint, b"Invalid IDENT");
@@ -82,14 +82,59 @@ pub fn main() {
 					client.heloed = true;
 					handler.network().send(endpoint, format!("{}", client.id).as_bytes());
 					println!("{:?}", client);
+					let new_name = client.name.clone();
+					for client in &mut clients {
+						handler.network().send(client.endpoint, format!("NEW;{}",new_name).as_bytes());
+					}
+					return
 				} else {
 					handler.network().send(endpoint, b"HELO first");
 					handler.network().remove(endpoint.resource_id());
 				}
 			}
+
+			if client.id != ident.id {
+				handler.network().send(endpoint, b"Invalid authentication!");
+				handler.network().remove(endpoint.resource_id());
+				return
+			}
+
+			let message: String = {
+				let a = received.to_string();
+				let b: Vec<&str> = a.split(";").collect();
+				let c = b.get(2);
+				if c.is_some() {
+					c.unwrap().to_string()
+				} else {
+					String::new()
+				}
+			};
+
+			let sender_name = client.name.clone();
+
+			for client in &mut clients {
+				handler.network().send(client.endpoint, format!("MSG;{}: {}",sender_name,message).as_bytes());
+			}
+			
 			// handler.network().send(endpoint, data);
 		},
-		NetEvent::Disconnected(_endpoint) => println!("Client disconnected"),
+		NetEvent::Disconnected(endpoint) => {
+			println!("Client disconnected");
+			let client_index = clients.iter().position(|c| c.address == endpoint.addr()).unwrap();
+			let client = match clients.get_mut(client_index) {
+				Some(c) => c,
+				None => {
+					eprintln!("An error occurred.");
+					handler.network().send(endpoint, b"An error occurred.");
+					handler.network().remove(endpoint.resource_id());
+					return;
+				}
+			};
+			let disconnected_name = client.name.clone();
+			for client in &mut clients {
+				handler.network().send(client.endpoint, format!("DIS;{}",disconnected_name).as_bytes());
+			}
+		},
 	});
 
 	println!("hi");

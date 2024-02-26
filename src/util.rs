@@ -21,7 +21,7 @@ pub fn read_input() -> String {
 /// # Returns
 ///
 /// The user's input as a `String`.
-pub fn get_input(prompt: &'static str) -> String {
+pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt); // the flush here is needed, in order to print the prompt 
     io::Write::flush(&mut io::stdout()).expect("flush failed!"); // TODO: implement panic safe flush
     let input = read_input();
