@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "ansi-control-codes"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8bf635757a78f1951ac54a4386ba9310332c181552ad5cb8dcb1c799a9a1573"
+
+[[package]]
 name = "anstream"
 version = "0.6.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -402,6 +408,7 @@ dependencies = [
 name = "rustchat"
 version = "0.1.0"
 dependencies = [
+ "ansi-control-codes",
  "clap",
  "message-io",
 ]

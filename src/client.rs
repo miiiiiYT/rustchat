@@ -1,6 +1,9 @@
 use message_io::node::{self, NodeEvent};
 use message_io::network::{NetEvent, Transport};
 
+use ansi_control_codes::control_sequences::CUU;
+
+use std::io::{repeat, Write};
 use std::sync::{Arc, Mutex, Barrier};
 
 use crate::ident::Identification;
@@ -12,6 +15,8 @@ enum Signal {
 }
 
 pub fn main(host: String, name: String) {
+    let prompt: String = format!("rustchat@{} > ",host);
+
 	let (handler, listener) = node::split();
 
     let handler = Arc::new(Mutex::new(handler));
@@ -34,6 +39,7 @@ pub fn main(host: String, name: String) {
     let startup_barrier: Arc<Barrier> = Arc::new(Barrier::new(2));
 
     let c_barrier: Arc<Barrier> = Arc::clone(&startup_barrier);
+    let prompt_c: String = prompt.clone();
 
 	let event_thread = std::thread::spawn(move || listener.for_each(move |event| {let handler = &handler_; match event {
         NodeEvent::Network(net_event) => match net_event {
@@ -67,21 +73,17 @@ pub fn main(host: String, name: String) {
 
                 let data: Vec<&str> = data.split(";").collect();
 
-                let mut message: String = String::new();
-
                 if data[0] == "MSG" {
                     if let Some(msg) = data.get(1) {
-                        message = msg.to_string();
+                        print_message(prompt_c.as_str(), msg.to_string());
                     }
-
-                    println!("{}", message);
                 } else if data[0] == "NEW" {
                     if let Some(name) = data.get(1) {
-                        println!("{} joined the chat!",name);
+                        print_message(prompt_c.as_str(), format!("{} joined the chat!",name));
                     }
                 } else if data[0] == "DIS" {
                     if let Some(name) = data.get(1) {
-                        println!("{} left the chat.", name);
+                        print_message(prompt_c.as_str(), format!("{} left the chat.",name));
                     }
                 }
             },
@@ -102,9 +104,10 @@ pub fn main(host: String, name: String) {
 
     startup_barrier.wait();
     loop {
-        let input = get_input(format!("rustchat@{} > ",host).as_str());
+        let input = get_input(&prompt.clone().as_str());
 
         if input.is_empty() {
+            handler.lock().unwrap().stop();
             break;
         } else if input == "\n" {
             continue;
@@ -113,6 +116,14 @@ pub fn main(host: String, name: String) {
         handler.lock().unwrap().signals().send(Signal::Message(input));
     }
 
-    event_thread.join().unwrap();
+    let _ = event_thread.join();
     
+}
+
+fn print_message(prompt: &str, message: String) {
+    print!("{}", CUU(None));
+    print!("\r{}"," ".repeat(prompt.len()+message.len()));
+    print!("\r{}\n",message);
+    print!("{}", prompt);
+    let _ = std::io::stdout().flush();
 }
