@@ -1,13 +1,11 @@
 use message_io::node::{self, NodeEvent};
 use message_io::network::{NetEvent, Transport};
 
-use ansi_control_codes::control_sequences::CUU;
-
 use std::io::Write;
 use std::sync::{Arc, Mutex, Barrier};
 
 use crate::ident::Identification;
-use crate::util::read_input;
+use crate::util::get_input;
 
 enum Signal {
 	Greet,
@@ -102,15 +100,7 @@ pub fn main(host: String, name: String) {
 
     startup_barrier.wait();
     loop {
-        print!("{}",prompt);
-        let _ = std::io::stdout().flush();
-        let read = read_input();
-        let input: String = match read {
-            Some(i) => i,
-            None => String::new()
-        };
-        print!("{}", CUU(None));
-        let _ = std::io::stdout().flush();
+        let input = get_input(&prompt);
 
         if input.is_empty() {
             handler.lock().unwrap().stop();

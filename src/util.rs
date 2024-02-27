@@ -1,4 +1,6 @@
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
+
+use ansi_control_codes::control_sequences::CUU;
 
 /// Reads a line of input from the user.
 ///
@@ -27,8 +29,10 @@ pub fn read_input() -> Option<String> {
 /// The user's input as a `String`.
 pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt); // the flush here is needed, in order to print the prompt 
-    io::Write::flush(&mut io::stdout()).expect("flush failed!"); // TODO: implement panic safe flush
+    let _ = io::stdout().flush();
     let input = read_input();
+    print!("{}",CUU(None));
+    let _ = io::stdout().flush();
     if input.is_some() {
         return input.unwrap()
     } else {
