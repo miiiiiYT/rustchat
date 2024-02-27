@@ -1,4 +1,4 @@
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead};
 
 /// Reads a line of input from the user.
 ///
@@ -29,7 +29,6 @@ pub fn get_input(prompt: &str) -> String {
     print!("{}", prompt); // the flush here is needed, in order to print the prompt 
     io::Write::flush(&mut io::stdout()).expect("flush failed!"); // TODO: implement panic safe flush
     let input = read_input();
-    let _ = io::stdout().flush();
     if input.is_some() {
         return input.unwrap()
     } else {

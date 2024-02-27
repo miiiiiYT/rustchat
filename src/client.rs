@@ -3,11 +3,11 @@ use message_io::network::{NetEvent, Transport};
 
 use ansi_control_codes::control_sequences::CUU;
 
-use std::io::{repeat, Write};
+use std::io::Write;
 use std::sync::{Arc, Mutex, Barrier};
 
 use crate::ident::Identification;
-use crate::util::get_input;
+use crate::util::{get_input, read_input};
 
 enum Signal {
 	Greet,
@@ -104,7 +104,16 @@ pub fn main(host: String, name: String) {
 
     startup_barrier.wait();
     loop {
-        let input = get_input(&prompt.clone().as_str());
+        //let input = get_input(&prompt.clone().as_str());
+        print!("{}",prompt);
+        let _ = std::io::stdout().flush();
+        let read = read_input();
+        let input: String = match read {
+            Some(i) => i,
+            None => String::new()
+        };
+        print!("{}", CUU(None));
+        let _ = std::io::stdout().flush();
 
         if input.is_empty() {
             handler.lock().unwrap().stop();
@@ -121,9 +130,12 @@ pub fn main(host: String, name: String) {
 }
 
 fn print_message(prompt: &str, message: String) {
-    print!("{}", CUU(None));
+    // print!("{}", CUU(None));
+    // let _ = std::io::stdout().flush();
     print!("\r{}"," ".repeat(prompt.len()+message.len()));
+    let _ = std::io::stdout().flush();
     print!("\r{}\n",message);
+    let _ = std::io::stdout().flush();
     print!("{}", prompt);
     let _ = std::io::stdout().flush();
 }
