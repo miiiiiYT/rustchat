@@ -7,7 +7,7 @@ use std::io::Write;
 use std::sync::{Arc, Mutex, Barrier};
 
 use crate::ident::Identification;
-use crate::util::{get_input, read_input};
+use crate::util::read_input;
 
 enum Signal {
 	Greet,
@@ -66,7 +66,6 @@ pub fn main(host: String, name: String) {
                         },
                     };
 
-                    // println!("{}", ident);
                     c_barrier.wait();
                     return
                 }
@@ -90,8 +89,7 @@ pub fn main(host: String, name: String) {
             NetEvent::Disconnected(_endpoint) => (),
         }
         NodeEvent::Signal(signal) => match signal {
-            Signal::Greet => { // computed every second
-                //handler.network().send(server, ident.to_ident_string().as_slice());
+            Signal::Greet => {
                 handler.lock().unwrap().network().send(server, &ident.to_ident_string());
             },
             Signal::Message(a) => {
@@ -104,7 +102,6 @@ pub fn main(host: String, name: String) {
 
     startup_barrier.wait();
     loop {
-        //let input = get_input(&prompt.clone().as_str());
         print!("{}",prompt);
         let _ = std::io::stdout().flush();
         let read = read_input();
@@ -130,8 +127,6 @@ pub fn main(host: String, name: String) {
 }
 
 fn print_message(prompt: &str, message: String) {
-    // print!("{}", CUU(None));
-    // let _ = std::io::stdout().flush();
     print!("\r{}"," ".repeat(prompt.len()+message.len()));
     let _ = std::io::stdout().flush();
     print!("\r{}\n",message);

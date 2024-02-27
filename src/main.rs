@@ -61,7 +61,6 @@ fn main() {
         server::main();
         return;
     } else if matches.get_flag("client") {
-        //let mut host = matches.get_one("host").unwrap();
         client::main(matches.get_one::<String>("host").unwrap().to_string(), matches.get_one::<String>("name").unwrap().to_string());
         return;
     } else {

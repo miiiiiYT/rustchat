@@ -38,9 +38,6 @@ impl Identification {
 
 	pub fn to_ident_string(&self) -> Vec<u8> {
 		let mut ident_string_vec = vec![self.id.to_string(), self.name.clone(), if self.helo {"HELO".to_string()} else {"".to_string()}];
-		// if ident_string_vec[2].is_empty() {
-		// 	ident_string_vec[2].pop();
-		// }
 
 		if ident_string_vec.last().map_or(false, |s| s.is_empty()) {
 			ident_string_vec.pop();

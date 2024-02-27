@@ -57,26 +57,6 @@ pub fn main() {
 				}
 			};
 			if !client.heloed {
-				/* if msg.contains("HELO FROM") {
-					let name = match msg.find("|") {
-						Some(i) => {
-							Some(msg[..i].to_string())
-						},
-						None => {
-							handler.network().send(endpoint, b"Invalid HELO");
-							handler.network().remove(endpoint.resource_id());
-							None
-						}
-					};
-					if name.is_some() {
-						client.name = name.unwrap();
-						client.heloed = true;
-						println!("{:?}", client);
-					} else {
-						handler.network().send(endpoint, b"Error: No name specified.");
-						handler.network().remove(endpoint.resource_id());
-					}
-				} */
 				if ident.helo {
 					client.name = ident.name;
 					client.heloed = true;
@@ -115,8 +95,6 @@ pub fn main() {
 			for client in &mut clients {
 				handler.network().send(client.endpoint, format!("MSG;{}: {}",sender_name,message).as_bytes());
 			}
-			
-			// handler.network().send(endpoint, data);
 		},
 		NetEvent::Disconnected(endpoint) => {
 			println!("Client disconnected");
